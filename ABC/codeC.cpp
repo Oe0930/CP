@@ -217,6 +217,27 @@ vector<int> topo_sort(vector<vector<ll>> &G) {
     }
     return ans;
 }
+vector<bool> Eratosthenes(ll N) {
+    // テーブル
+    vector<bool> isprime(N+1, true);
+
+    // 1 は予めふるい落としておく
+    isprime[1] = false;
+
+    // ふるい
+    for (ll p = 2; p <= N; ++p) {
+        // すでに合成数であるものはスキップする
+        if (!isprime[p]) continue;
+
+        // p 以外の p の倍数から素数ラベルを剥奪
+        for (ll q = p * 2; q <= N; q += p) {
+            isprime[q] = false;
+        }
+    }
+
+    // 1 以上 N 以下の整数が素数かどうか
+    return isprime;
+}
 
 mt19937 rng(123456);  // 固定seed（好きな数字でOK）
 // [l, r] の整数乱数
@@ -1072,33 +1093,6 @@ public:
     }
 };
 
-int dfs(int i, vector<bool> &seen, vector<bool> &finished, vector<set<int>> &con0, vector<set<int>> &con1, UnionFind &uf, stack<int> &root)
-{
-    seen.at(i) = true;
-    root.push(i);
-
-    for(int v : con0.at(i))
-    {
-        if(finished.at(i)) continue;
-
-        if(seen.at(v))
-        {
-            return i;
-        }
-
-        int pos = dfs(v, seen, finished, con0, con1, uf, root);
-        if(pos != -1)
-        {
-            
-
-            root.pop();
-        }
-    }
-
-    finished.at(i) = true;
-    root.pop();
-    return -1;
-}
 
 int main()
 {

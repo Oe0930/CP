@@ -4,8 +4,6 @@ using namespace std;
 using ll = long long;
 using ull = unsigned long long;
 using str = string;
-using pll = pair<ll,ll>;
-using pqPll = priority_queue<pll>;
 
 static int intMin = numeric_limits<int>::min();
 static int intMax = numeric_limits<int>::max();
@@ -47,20 +45,19 @@ class ReadFunctions { public:
     double dbl() { double x; scanf("%lf", &x); return x; }
     string str() { string x; cin >> x; return x; }
     char cha() { char x; scanf(" %c", &x); return x; }
+
+    template <class T> T t() { T x; cin >> x; return x; }
+    template <class... Ts> auto ts() { return make_tuple(t<Ts>()...); }
     
     ReadArray a;
     ReadMap map;
 }; ReadFunctions re;
 
-void write(string s) { printf("%s\n", s.c_str()); }
-void write(char c) { printf("%c\n", c); }
-void write(int n) { printf("%i\n", n); }
-void write(long long n) { printf("%lld\n", n); }
-void write(unsigned long long n) { printf("%llu\n", n); }
-void write(double n) { printf("%.10f\n", n); }
-void write(long double n) { printf("%.15Lf\n", n); }
-void write(bool a) { printf("%s\n", a ? "Yes" : "No"); }
+template <class T> void wr(T x) { cout << x;}
+template <class T> void wrln(T x) { cout << x << endl;}
+template <class T> void wrVecln(vector<T> v) { for(int i=0;i<v.size();i++) {cout << v[i] << " ";} cout << endl;}
 void writeMinus1() {printf("%i\n", -1);}
+void write(bool ans) { cout << (ans ? "Yes" : "No") << endl;}
 
 /* keysにそってvalueをソート */
 template <typename T> void Sort(std::vector<T>& keys, std::vector<T>& values) {
@@ -219,6 +216,27 @@ vector<int> topo_sort(vector<vector<ll>> &G) {
         }
     }
     return ans;
+}
+vector<bool> Eratosthenes(ll N) {
+    // テーブル
+    vector<bool> isprime(N+1, true);
+
+    // 1 は予めふるい落としておく
+    isprime[1] = false;
+
+    // ふるい
+    for (ll p = 2; p <= N; ++p) {
+        // すでに合成数であるものはスキップする
+        if (!isprime[p]) continue;
+
+        // p 以外の p の倍数から素数ラベルを剥奪
+        for (ll q = p * 2; q <= N; q += p) {
+            isprime[q] = false;
+        }
+    }
+
+    // 1 以上 N 以下の整数が素数かどうか
+    return isprime;
 }
 
 mt19937 rng(123456);  // 固定seed（好きな数字でOK）
@@ -1074,6 +1092,7 @@ public:
         return queryRange(1, 0, n - 1, l, r).sumsq;
     }
 };
+
 
 int main()
 {

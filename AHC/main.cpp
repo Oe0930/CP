@@ -4,8 +4,6 @@ using namespace std;
 using ll = long long;
 using ull = unsigned long long;
 using str = string;
-using pll = pair<ll,ll>;
-using pqPll = priority_queue<pll>;
 
 static int intMin = numeric_limits<int>::min();
 static int intMax = numeric_limits<int>::max();
@@ -47,20 +45,19 @@ class ReadFunctions { public:
     double dbl() { double x; scanf("%lf", &x); return x; }
     string str() { string x; cin >> x; return x; }
     char cha() { char x; scanf(" %c", &x); return x; }
+
+    template <class T> T t() { T x; cin >> x; return x; }
+    template <class... Ts> auto ts() { return make_tuple(t<Ts>()...); }
     
     ReadArray a;
     ReadMap map;
 }; ReadFunctions re;
 
-void write(string s) { printf("%s\n", s.c_str()); }
-void write(char c) { printf("%c\n", c); }
-void write(int n) { printf("%i\n", n); }
-void write(long long n) { printf("%lld\n", n); }
-void write(unsigned long long n) { printf("%llu\n", n); }
-void write(double n) { printf("%.10f\n", n); }
-void write(long double n) { printf("%.15Lf\n", n); }
-void write(bool a) { printf("%s\n", a ? "Yes" : "No"); }
+template <class T> void wr(T x) { cout << x;}
+template <class T> void wrln(T x) { cout << x << endl;}
+template <class T> void wrVecln(vector<T> v) { for(int i=0;i<v.size();i++) {cout << v[i] << " ";} cout << endl;}
 void writeMinus1() {printf("%i\n", -1);}
+void write(bool ans) { cout << (ans ? "Yes" : "No") << endl;}
 
 /* keysにそってvalueをソート */
 template <typename T> void Sort(std::vector<T>& keys, std::vector<T>& values) {
@@ -219,6 +216,27 @@ vector<int> topo_sort(vector<vector<ll>> &G) {
         }
     }
     return ans;
+}
+vector<bool> Eratosthenes(ll N) {
+    // テーブル
+    vector<bool> isprime(N+1, true);
+
+    // 1 は予めふるい落としておく
+    isprime[1] = false;
+
+    // ふるい
+    for (ll p = 2; p <= N; ++p) {
+        // すでに合成数であるものはスキップする
+        if (!isprime[p]) continue;
+
+        // p 以外の p の倍数から素数ラベルを剥奪
+        for (ll q = p * 2; q <= N; q += p) {
+            isprime[q] = false;
+        }
+    }
+
+    // 1 以上 N 以下の整数が素数かどうか
+    return isprime;
 }
 
 mt19937 rng(123456);  // 固定seed（好きな数字でOK）
@@ -1075,375 +1093,8 @@ public:
     }
 };
 
-pair<ll,vector<pair<int,int>>> simulate(vector<vector<bool>> &map, vector<vector<int>> &wall)
-{
-    int n = map.size();
-    queue<tuple<ll,ll,ll>> q;
-    vector<vector<ll>> dis(n,vector<ll>(n,longMax));
-    q.push({0,0,0});
-    dis.at(0).at(0) = 0;
-
-
-    while(q.size())
-    {
-        auto[i,j,d] = q.front();
-        q.pop();
-
-        if(dis.at(i).at(j) < d) continue;
-
-        for(int t = 0; t < 4; t++)
-        {
-            int I = i+di[t];
-            int J = j+dj[t];
-
-            if(0 <= I && I < n && 0 <= J && J < n && dis.at(I).at(J) > d+1 && map.at(I).at(J))
-            {
-                if((t == 0 && wall.at(i-1).at(j) % 2 != 0) || (t == 1 && wall.at(i).at(j) >= 2) || (t == 2 && wall.at(i).at(j) % 2 != 0) || (t == 3 && wall.at(i).at(j-1) >=2)) continue;
-
-
-                dis.at(I).at(J) = d+1;
-                q.push({I,J,d+1});
-            }
-        }
-    }
-
-    if(dis.at(n-1).at(n-1) == longMax) return {longMax, {}};
-
-    vector<pair<int,int>> root = {{n-1,n-1}};
-    int x = n-1; int y = n-1;
-    while(x != 0 || y != 0)
-    {
-        for(int t = 0; t < 4; t++)
-        {
-            int i = x+di[t];
-            int j = y+dj[t];
-
-            if(0 <= i && i < n && 0 <= j && j < n && map.at(i).at(j) && dis.at(i).at(j) == dis.at(x).at(y)-1)
-            {
-                if((t == 0 && wall.at(x-1).at(y) % 2 != 0) || (t == 1 && wall.at(x).at(y) >= 2) || (t == 2 && wall.at(x).at(y) % 2 != 0) || (t == 3 && wall.at(x).at(y-1) >=2)) continue;
-                x = i;
-                y = j;
-                break;
-            }
-        }
-
-        root.push_back({x,y});
-    }
-
-    Reverse(root);
-    return {dis.at(n-1).at(n-1), root};
-}
-
-vector<vector<ll>> dis(int si, int sj, vector<vector<bool>> &map, vector<vector<int>> &wall)
-{
-    int n = map.size();
-    queue<tuple<ll,ll,ll>> q;
-    vector<vector<ll>> dis(n,vector<ll>(n,longMax));
-    q.push({si,sj,0});
-    dis.at(si).at(sj) = 0;
-
-
-    while(q.size())
-    {
-        auto[i,j,d] = q.front();
-        q.pop();
-
-        if(dis.at(i).at(j) < d) continue;
-
-        for(int t = 0; t < 4; t++)
-        {
-            int I = i+di[t];
-            int J = j+dj[t];
-
-            if(0 <= I && I < n && 0 <= J && J < n && dis.at(I).at(J) > d+1 && map.at(I).at(J))
-            {
-                if((t == 0 && wall.at(i-1).at(j) % 2 != 0) || (t == 1 && wall.at(i).at(j) >= 2) || (t == 2 && wall.at(i).at(j) % 2 != 0) || (t == 3 && wall.at(i).at(j-1) >=2)) continue;
-
-
-                dis.at(I).at(J) = d+1;
-                q.push({I,J,d+1});
-            }
-        }
-    }
-
-    return dis;
-}
 
 int main()
 {
-    auto[n,m,k] = re.ll3();
-    auto map = re.map.bo(n,n,'.');
-
-    vector<vector<int>> wall(n, vector<int>(n,0));
-    set<tuple<int,int,int>> wallSet;
-
-    int cnt;
-    ll maxT = 0;
-    for(cnt = 1; cnt <= m; cnt++)
-    {
-        tuple<int,int,int> bestWall = {-1,-1,-1};
-
-        auto[memoT, root] = simulate(map,wall);
-
-        for(int t = 0; t < memoT; t++)
-        {
-            auto[i,j] = root.at(t);
-            int deltaI = root.at(t+1).first - root.at(t).first;
-            int deltaJ = root.at(t+1).second - root.at(t).second;
-
-            if(deltaI == 1)
-            {
-                wall.at(i).at(j) += 1;
-                auto[mT,root_] = simulate(map,wall);
-                wall.at(i).at(j) -= 1;
-                if(mT != longMax)
-                {
-                    maxT = max(maxT,mT);
-                    bestWall = {i,j,0};
-                    break;
-                }
-            }
-            
-            if(deltaI == -1)
-            {
-                wall.at(i-1).at(j) += 1;
-                auto[mT,root_] = simulate(map,wall);
-                wall.at(i-1).at(j) -= 1;
-                if(mT != longMax)
-                {
-                    maxT = max(maxT,mT);
-                    bestWall = {i-1,j,0};
-                    break;
-                }
-            }
-
-            if(deltaJ == 1)
-            {
-                wall.at(i).at(j) += 2;
-                auto[mT,root_] = simulate(map,wall);
-                wall.at(i).at(j) -= 2;
-                if(mT != longMax)
-                {
-                    maxT = max(maxT,mT);
-                    bestWall = {i,j,1};
-                    break;
-                }
-            }
-
-            if(deltaJ == -1)
-            {
-                wall.at(i).at(j-1) += 2;
-                auto[mT,root_] = simulate(map,wall);
-                wall.at(i).at(j-1) -= 2;
-                if(mT != longMax)
-                {
-                    maxT = max(maxT,mT);
-                    bestWall = {i,j-1,1};
-                    break;
-                }
-            }
-        }
-
-        for(int i = 0; i < n; i++)
-        {
-            for(int j = 0; j < n; j++)
-            {
-                for(int d = 0; d < 2; d++)
-                {
-                    if((wall.at(i).at(j) & (1 << d)) != 0) continue;
-                    if((d == 0 && i == n-1) || (d == 1 && j == n-1)) continue;
-                    if(map.at(i).at(j) == false) continue;
-
-                    wall.at(i).at(j) += d+1;
-
-                    auto[thisT, root_] = simulate(map,wall);
-
-                    wall.at(i).at(j) -= d+1;
-
-                    if(thisT == longMax) continue;
-
-                    if(thisT > maxT)
-                    {
-                        maxT = thisT;
-                        bestWall = {i,j,d};
-                    }
-                }
-            }
-        }
-
-        if(maxT == 0)
-        {
-            break;;
-        }
-
-        if(bestWall == make_tuple(-1,-1,-1)) break;
-        auto[x,y,z] = bestWall;
-        wall.at(x).at(y) += z+1;
-        wallSet.insert({x,y,z});
-        cerr << z << " " << x << " " << y << " " << 1 << endl;
-    }
-
-    vector<tuple<int,int,int,int>> addWalls;
-    vector<tuple<int,int,int>> buttons;
-    if(cnt-1 <= 50)
-    {
-        auto[_T, root] = simulate(map,wall);
-        auto[i,j] = root.at(_T-2);
-            int deltaI = root.at(_T-2+1).first - root.at(_T-2).first;
-            int deltaJ = root.at(_T-2+1).second - root.at(_T-2).second;
-
-            vector<vector<ll>> disS, disG;
-
-            if(deltaI == 1)
-            {
-                addWalls.push_back({i,j,0,3});
-                wallSet.insert({i,j,0});
-                wall.at(i).at(j) += 1;
-                disS = dis(0,0,map,wall);
-                wall.at(i).at(j) -= 1;
-            }
-            
-            if(deltaI == -1)
-            {
-                addWalls.push_back({i-1,j,0,3});
-                wallSet.insert({i-1,j,0});
-                wall.at(i-1).at(j) += 1;
-                disS = dis(0,0,map,wall);
-                wall.at(i-1).at(j) -= 1;
-            }
-
-            if(deltaJ == 1)
-            {
-                addWalls.push_back({i,j,1,3});
-                wallSet.insert({i,j,1});
-                wall.at(i).at(j) += 2;
-                disS = dis(0,0,map,wall);
-                wall.at(i).at(j) -= 2;
-            }
-
-            if(deltaJ == -1)
-            {
-                addWalls.push_back({i,j-1,1,3});
-                wallSet.insert({i,j-1,1});
-                wall.at(i).at(j-1) += 2;
-                disS = dis(0,0,map,wall);
-                wall.at(i).at(j-1) -= 2;
-            }
-
-        disG = dis(n-1,n-1,map,wall);
-
-        ll maxD = 0;
-        pair<int,int> maxPos = {0,0};
-        for(int x = 0; x < n; x++)
-        {
-            for(int y = 0; y < n; y++)
-            {
-                if(map.at(x).at(y) && disS.at(x).at(y) != longMax && disG.at(x).at(y) != longMax && disS.at(x).at(y) + disG.at(x).at(y) > maxD)
-                {
-                    maxD = disS.at(x).at(y)+disG.at(x).at(y);
-                    maxPos = {x,y};
-                }
-            }
-        }
-
-        buttons.push_back({maxPos.first, maxPos.second, 1});
-
-        auto[p,q] = root.at(_T-1);
-        deltaI = root.at(_T-1+1).first - root.at(_T-1).first;
-        deltaJ = root.at(_T-1+1).second - root.at(_T-1).second;
-        if(deltaI == 1)
-            {
-                addWalls.push_back({p,q,0,1});
-                wallSet.insert({p,q,0});
-                wall.at(p).at(q) += 1;
-                disS = dis(maxPos.first,maxPos.second,map,wall);
-                wall.at(p).at(q) -= 1;
-            }
-            
-            if(deltaI == -1)
-            {
-                addWalls.push_back({p-1,q,0,1});
-                wallSet.insert({p-1,q,0});
-                wall.at(p-1).at(q) += 1;
-                disS = dis(maxPos.first,maxPos.second,map,wall);
-                wall.at(p-1).at(q) -= 1;
-            }
-
-            if(deltaJ == 1)
-            {
-                addWalls.push_back({p,q,1,1});
-                wallSet.insert({p-1,q,0});
-                wall.at(p).at(q) += 2;
-                disS = dis(maxPos.first,maxPos.second,map,wall);
-                wall.at(p).at(q) -= 2;
-            }
-
-            if(deltaJ == -1)
-            {
-                addWalls.push_back({p,q-1,1,1});
-                wallSet.insert({p-1,q,0});
-                wall.at(p).at(q-1) += 2;
-                disS = dis(maxPos.first,maxPos.second,map,wall);
-                wall.at(p).at(q-1) -= 2;
-            }
-
-        disG = dis(n-1,n-1,map,wall);
-
-        maxD = 0;
-        for(int x = 0; x < n; x++)
-        {
-            for(int y = 0; y < n; y++)
-            {
-                if(map.at(x).at(y) && disS.at(x).at(y) != longMax && disG.at(x).at(y) != longMax && disS.at(x).at(y)+disG.at(x).at(y) > maxD)
-                {
-                    bool ok = true;
-                    for(auto[i,j] : root)
-                    {
-                        if(i == x && j == y)
-                        {
-                            ok = false;
-                            break;
-                        }
-                    }
-                    if(!ok) continue;
-                    maxD = disS.at(x).at(y)+disG.at(x).at(y);
-                    maxPos = {x,y};
-                }
-            }
-        }
-
-        buttons.push_back({maxPos.first, maxPos.second, 0});
-        int tt = 0;
-        while(cnt-1+addWalls.size() <= m && tt < 4)
-        {
-            if(tt == 0 && maxPos.first < n-1 && !wallSet.count({maxPos.first, maxPos.second,0})) addWalls.push_back({maxPos.first, maxPos.second,0,3});
-            else if(tt == 1 && maxPos.second < n-1 && !wallSet.count({maxPos.first, maxPos.second,1})) addWalls.push_back({maxPos.first, maxPos.second,1,3});
-            else if(tt == 2 && maxPos.first > 0 && !wallSet.count({maxPos.first-1, maxPos.second,0})) addWalls.push_back({maxPos.first-1, maxPos.second,0,3});
-            else if(tt == 3 && maxPos.second > 0 && !wallSet.count({maxPos.first, maxPos.second-1,1})) addWalls.push_back({maxPos.first, maxPos.second-1,1,3});
-            tt++;
-        }
-    }
     
-    
-    cout << cnt-1 + addWalls.size() << endl;
-
-    for(int i = 0; i < n; i++)
-    {
-        for(int j = 0; j < n; j++)
-        {
-            if((wall.at(i).at(j) & 1) != 0) cout << 0 << " " << i << " " << j << " " << 2*k-1 << endl;
-            if((wall.at(i).at(j) & 2) != 0) cout << 1 << " " << i << " " << j << " " << 2*k-1 << endl;  
-        }
-    }
-
-    for(auto[i,j,d,g] : addWalls)
-    {
-        cout << d << " " << i << " " << j << " " << g << endl;
-    }
-
-    cout << buttons.size() << endl;
-    for(auto[i,j,g] : buttons)
-    {
-        cout << i << " " << j << " " << g << endl;
-    }
 }

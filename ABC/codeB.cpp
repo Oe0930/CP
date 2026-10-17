@@ -57,6 +57,7 @@ template <class T> void wr(T x) { cout << x;}
 template <class T> void wrln(T x) { cout << x << endl;}
 template <class T> void wrVecln(vector<T> v) { for(int i=0;i<v.size();i++) {cout << v[i] << " ";} cout << endl;}
 void writeMinus1() {printf("%i\n", -1);}
+void write(bool ans) { cout << (ans ? "Yes" : "No") << endl;}
 
 /* keysにそってvalueをソート */
 template <typename T> void Sort(std::vector<T>& keys, std::vector<T>& values) {
@@ -215,6 +216,27 @@ vector<int> topo_sort(vector<vector<ll>> &G) {
         }
     }
     return ans;
+}
+vector<bool> Eratosthenes(ll N) {
+    // テーブル
+    vector<bool> isprime(N+1, true);
+
+    // 1 は予めふるい落としておく
+    isprime[1] = false;
+
+    // ふるい
+    for (ll p = 2; p <= N; ++p) {
+        // すでに合成数であるものはスキップする
+        if (!isprime[p]) continue;
+
+        // p 以外の p の倍数から素数ラベルを剥奪
+        for (ll q = p * 2; q <= N; q += p) {
+            isprime[q] = false;
+        }
+    }
+
+    // 1 以上 N 以下の整数が素数かどうか
+    return isprime;
 }
 
 mt19937 rng(123456);  // 固定seed（好きな数字でOK）
@@ -1071,59 +1093,8 @@ public:
     }
 };
 
+
 int main()
 {
-    auto[n,q] = re.ll2();
-    vector<vector<tuple<ll,ll>>> con(n);
-    vector<ll> cntIn(n,0);
     
-    while(q--)
-    {
-        auto[t,u,v] = re.ll3();
-        u--; v--;
-
-        con.at(u).push_back({v,t});
-        cntIn.at(v)++;
-    }
-
-    vector<ll> ans(n,-1);
-
-    for(int i = 0; i < n; i++)
-    {
-        queue<ll> que;
-        vector<ll> memo(n,-1);
-        set<ll> seen;
-        if(ans.at(i) == -1)
-        {
-            memo.at(i) = 0;
-            seen.insert(i);
-            que.push(i);
-        }
-        else continue;
-
-        ll delta = 0;
-
-        while(que.size())
-        {
-            int v = que.front();
-            que.pop();
-
-            for(auto[u,t] : con.at(v))
-            {
-                memo.at(u) = max(memo.at(u), memo.at(v)+t);
-                seen.insert(u);
-                
-                cntIn.at(u)--;
-                if(cntIn.at(u) == 0)
-                {
-                    que.push(u);
-                }
-
-                if(ans.at(u) != -1)
-                {
-                    delta = min(delta, memo.at(u) - ans.at(u));
-                }
-            }
-        }
-    }
 }

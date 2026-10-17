@@ -1096,32 +1096,5 @@ public:
 
 int main()
 {
-    int n = re.in();
     
-    vector<map<ll,ll>> con(n);
-    for(int i = 0; i < n-1; i++)
-    {
-        auto[a,b] = re.ll2();
-        a--; b--;
-
-        con.at(a)[b] = -1;
-        con.at(b)[a] = -1;
-    }
-
-    queue<ll> q;
-    for(int i = 0; i < n; i++)
-    {
-        if(con.at(i).size() == 1)
-        {
-            q.push(i);
-        }
-    }
-
-    while(q.size())
-    {
-        auto v = q.front();
-        q.pop();
-
-        
-    }
 }
